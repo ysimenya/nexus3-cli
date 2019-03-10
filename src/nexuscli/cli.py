@@ -95,20 +95,14 @@ def _input_yesno(prompt, default):
 
 def _input(prompt, default=None):
     """
-    Prompts for a text answer. Uses raw_input for Python 2.x and input for
-    Python 3.x
+    Prompts for a text answer with an optional default choice.
 
     :param prompt: question to be displayed to user
     :param default: default choice
     :return: user-provided answer or None, if default not provided.
     :rtype: Union[str,None]
     """
-    if sys.version_info < (3, 0):
-        real_input = raw_input  # noqa - Python2
-    else:
-        real_input = input
-
-    value = real_input('{prompt} ({default}):'.format(**locals()))
+    value = input(f'{prompt} ({default}):')
     if value:
         return value
 
@@ -266,8 +260,7 @@ def cmd_upload(args):
     source = args['<from_src>']
     destination = args['<to_repository>']
 
-    sys.stderr.write(
-        'Uploading {source} to {destination}\n'.format(**locals()))
+    sys.stderr.write(f'Uploading {source} to {destination}\n')
 
     upload_count = nexus_client.upload(
                     source, destination,
@@ -277,8 +270,7 @@ def cmd_upload(args):
     _cmd_up_down_errors(upload_count, 'upload')
 
     file = PLURAL('file', upload_count)
-    sys.stderr.write(
-        'Uploaded {upload_count} {file} to {destination}\n'.format(**locals()))
+    sys.stderr.write(f'Uploaded {upload_count} {file} to {destination}\n')
     return 0
 
 
@@ -288,8 +280,7 @@ def cmd_download(args):
     source = args['<from_repository>']
     destination = args['<to_dst>']
 
-    sys.stderr.write(
-        'Downloading {source} to {destination}\n'.format(**locals()))
+    sys.stderr.write(f'Downloading {source} to {destination}\n')
 
     download_count = nexus_client.download(
                         source, destination,
@@ -300,8 +291,7 @@ def cmd_download(args):
 
     file_word = PLURAL('file', download_count)
     sys.stderr.write(
-        'Downloaded {download_count} {file_word} to '
-        '{destination}\n'.format(**locals()))
+        f'Downloaded {download_count} {file_word} to {destination}\n')
     return 0
 
 
@@ -315,8 +305,7 @@ def cmd_delete(options):
     _cmd_up_down_errors(delete_count, 'delete')
 
     file_word = PLURAL('file', delete_count)
-    sys.stderr.write(
-        'Deleted {delete_count} {file_word}\n'.format(**locals()))
+    sys.stderr.write(f'Deleted {delete_count} {file_word}\n')
     return 0
 
 

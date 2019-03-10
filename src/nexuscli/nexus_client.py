@@ -1,4 +1,3 @@
-from builtins import str as text  # Python 2
 import io
 import json
 import logging
@@ -7,21 +6,11 @@ import py
 import requests
 import sys
 from clint.textui import progress
-
-try:
-    from urllib.parse import urljoin  # Python 3
-except ImportError:
-    from urlparse import urljoin      # Python 2
+from urllib.parse import urljoin
 
 from . import exception, nexus_util
 from .repository import RepositoryCollection, REMOTE_PATH_SEPARATOR
 from .script import ScriptCollection
-
-# Python 2 compatibility
-try:
-    FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError  # Python 2
 
 LOG = logging.getLogger(__name__)
 
@@ -132,6 +121,15 @@ class NexusClient(object):
         url = urljoin(self.base_url, '/service/rest/')
         return urljoin(url, self._api_version + '/')
 
+    @property
+    def config(self):
+        return {
+            'nexus_user': self._auth[0],
+            'nexus_pass': self._auth[1],
+            'nexus_url': self.base_url,
+            'nexus_verify': self._verify,
+        }
+
     def write_config(self):
         """
         Writes the latest configuration set using :meth:`set_config` to disk
@@ -144,15 +142,7 @@ class NexusClient(object):
         nexus_config.ensure()
         nexus_config.chmod(0o600)
         with io.open(nexus_config.strpath, mode='w+', encoding='utf-8') as fh:
-            # If this looks dumb, it's because it needs to work with Python 2
-            fh.write(text(
-                json.dumps({
-                    'nexus_user': self._auth[0],
-                    'nexus_pass': self._auth[1],
-                    'nexus_url': self.base_url,
-                    'nexus_verify': self._verify,
-                }, ensure_ascii=False)
-            ))
+            json.dump(self.config, fh, ensure_ascii=False)
 
     def read_config(self):
         """
@@ -536,8 +526,8 @@ class NexusClient(object):
                 continue
 
             if self._local_hash_matches_remote(download_path, h, hash_name):
-                LOG.debug('Skipping {download_url} because local copy '
-                          '{download_path} is up-to-date\n'.format(**locals()))
+                LOG.debug(f'Skipping {download_url} because local copy '
+                          f'{download_path} is up-to-date\n')
                 return True
 
         return False
@@ -557,12 +547,11 @@ class NexusClient(object):
         if response.status_code != 200:
             sys.stderr.write(response.__dict__)
             raise exception.DownloadError(
-                'Downloading from {download_url}. '
-                'Reason: {response.reason}'.format(**locals()))
+                f'Downloading from {download_url}. '
+                f'Reason: {response.reason}')
 
         with open(destination, 'wb') as fd:
-            LOG.debug('Writing {download_url} to {destination}\n'.format(
-                **locals()))
+            LOG.debug('Writing %s to %s', download_url, destination)
             for chunk in response.iter_content():
                 fd.write(chunk)
 
@@ -637,9 +626,8 @@ class NexusClient(object):
             id_ = artefact['id']
             artefact_path = artefact['path']
 
-            response = self._delete('assets/{id_}'.format(**locals()))
-            LOG.info(
-                'Deleted: {artefact_path} ({id_})'.format(**locals()))
+            response = self._delete(f'assets/{id_}')
+            LOG.info('Deleted: %s (%s)', artefact_path, id_)
             delete_count += 1
             if response.status_code == 404:
                 LOG.warning('File disappeared while deleting')
