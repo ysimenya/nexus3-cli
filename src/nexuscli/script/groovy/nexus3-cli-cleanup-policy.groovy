@@ -1,13 +1,12 @@
 // Original from:
 // https://github.com/idealista/nexus-role/blob/master/files/scripts/cleanup_policy.groovy
+import com.google.common.collect.Maps
 import groovy.json.JsonSlurper
 import groovy.json.JsonBuilder
 import java.util.concurrent.TimeUnit
 
 import org.sonatype.nexus.cleanup.storage.CleanupPolicy
 import org.sonatype.nexus.cleanup.storage.CleanupPolicyStorage
-import com.google.common.collect.Maps
-
 import static org.sonatype.nexus.repository.search.DefaultComponentMetadataProducer.IS_PRERELEASE_KEY
 import static org.sonatype.nexus.repository.search.DefaultComponentMetadataProducer.LAST_BLOB_UPDATED_KEY
 import static org.sonatype.nexus.repository.search.DefaultComponentMetadataProducer.LAST_DOWNLOADED_KEY
@@ -35,6 +34,7 @@ Map<String, String> criteriaMap = createCriteria(parsed_args)
 
 // "update" operation
 if (cleanupPolicyStorage.exists(parsed_args.name)) {
+    log.debug("Updating Cleanup Policy <name=${parsed_args.name}>")
     existingPolicy = cleanupPolicyStorage.get(parsed_args.name)
     existingPolicy.setNotes(parsed_args.notes)
     existingPolicy.setCriteria(criteriaMap)
@@ -44,6 +44,7 @@ if (cleanupPolicyStorage.exists(parsed_args.name)) {
 
 // "create" operation
 format = parsed_args.format == "all" ? "ALL_FORMATS" : parsed_args.format
+log.debug("Creating Cleanup Policy <name=${parsed_args.name}>")
 cleanupPolicy = new CleanupPolicy(
         name: parsed_args.name,
         notes: parsed_args.notes,
@@ -57,19 +58,21 @@ return toJsonString(cleanupPolicy)
 
 def Map<String, String> createCriteria(parsed_args) {
     Map<String, String> criteriaMap = Maps.newHashMap()
-    if (parsed_args.published_before == null) {
+    if (parsed_args.criteria.lastBlobUpdated == null) {
         criteriaMap.remove(LAST_BLOB_UPDATED_KEY)
     } else {
-        criteriaMap.put(LAST_BLOB_UPDATED_KEY, asStringSeconds(parsed_args.published_before))
+        criteriaMap.put(LAST_BLOB_UPDATED_KEY, asStringSeconds(parsed_args.criteria.lastBlobUpdated))
     }
-    if (parsed_args.last_download_before == null) {
+    if (parsed_args.criteria.lastDownloaded == null) {
         criteriaMap.remove(LAST_DOWNLOADED_KEY)
     } else {
-        criteriaMap.put(LAST_DOWNLOADED_KEY, asStringSeconds(parsed_args.last_download_before))
+        criteriaMap.put(LAST_DOWNLOADED_KEY, asStringSeconds(parsed_args.criteria.lastDownloaded))
     }
-    if (parsed_args.is_pre_release != "") {
-        criteriaMap.put(IS_PRERELEASE_KEY, String.valueOf(parsed_args.is_pre_release))
+    if (parsed_args.criteria.preRelease != "") {
+        criteriaMap.put(IS_PRERELEASE_KEY, String.valueOf(parsed_args.criteria.preRelease))
     }
+    log.debug("Using criteriaMap: ${criteriaMap}")
+
     return criteriaMap
 }
 
