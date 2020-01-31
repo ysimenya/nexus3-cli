@@ -8,7 +8,6 @@ OSS 3](https://www.sonatype.com/download-oss-sonatype).
 [![codecov](https://codecov.io/gh/thiagofigueiro/nexus3-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/thiagofigueiro/nexus3-cli)
 [![Documentation Status](https://readthedocs.org/projects/nexus3-cli/badge/?version=latest)](https://nexus3-cli.readthedocs.io/en/latest/?badge=latest)
 
-
 ## Features
 
 1. Compatible with [Nexus 3 OSS](https://www.sonatype.com/download-oss-sonatype)
@@ -140,10 +139,9 @@ Version 2.0.0 has significant API changes from 1.0.0. In summary:
 * Unit tests have been refactored and re-organised to more closely match the
   `src` structure.
 
-If you need to stay on versoin 1.0.x for some reason, you can pin your
+If you need to stay on version 1.0.x for some reason, you can pin your
 requirements (e.g.: `'nexus3-cli>=1.0.2,<2`). Note that I will no longer
 support 1.0.x, although I'm happy to review contributions.
-
 
 ## Development
 
