@@ -42,9 +42,7 @@ class NexusConfig:
         self._api_version = api_version
         self._username = username
         self._password = password
-        self._url = url
-        if not self._url.endswith('/'):
-            self._url += '/'
+        self._url = url.rstrip('/')
         self._x509_verify = x509_verify
         self._config_path = Path(config_path or DEFAULT_CONFIG)
 

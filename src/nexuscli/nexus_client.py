@@ -6,7 +6,6 @@ import requests
 import semver
 import sys
 from clint.textui import progress
-from urllib.parse import urljoin
 
 from nexuscli.nexus_config import NexusConfig
 from nexuscli import exception, nexus_util
@@ -117,8 +116,7 @@ class NexusClient(object):
 
         :rtype: str
         """
-        url = urljoin(self.config.url, 'service/rest/')
-        return urljoin(url, self.config.api_version + '/')
+        return f"{self.config.url}/service/rest/{self.config.api_version}"
 
     def http_request(self, method, endpoint, service_url=None, **kwargs):
         """
@@ -136,7 +134,7 @@ class NexusClient(object):
         :rtype: requests.Response
         """
         service_url = service_url or self.rest_url
-        url = urljoin(service_url, endpoint)
+        url = f"{service_url}/{endpoint}"
 
         try:
             response = requests.request(
